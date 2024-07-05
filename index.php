@@ -19,15 +19,7 @@ if(isset($_POST['submit'])){
     $login_token = bin2hex(random_bytes(16));
     $login_link = "localhost/Email_Server/login.php?login_token=".$login_token;
     
-    $sql = "INSERT INTO login_tokens (email, token) VALUES ('$email', '$login_token')";
-
-    
-    if (mysqli_query($conn, $sql)) {
-        echo "Record inserted successfully";
-    } else {
-        echo "Error: " . mysqli_error($conn);
-    }
-
+   
 
 
     $mail = new PHPMailer(true); //  yeah mail ka object banaya hai
@@ -49,6 +41,20 @@ if(isset($_POST['submit'])){
     echo 'Email has been sent successfully.';
 
     $_POST['submit']=null;
+
+
+    // data db mien tab insert kiyaa hai jab email send ho jaye usse pehal nhii toh data db mien invalid data na jyee
+    $sql = "INSERT INTO login_tokens (email, token) VALUES ('$email', '$login_token')";
+
+    
+    if (mysqli_query($conn, $sql)) {
+        echo "Record inserted successfully";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+
+
+
     echo "<script>
     alert('Email Sent Successfully!');
     window.location.href = 'index.php';
@@ -59,6 +65,14 @@ if(isset($_POST['submit'])){
     
 } catch (Exception $e) {
     echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    $_POST['submit']=null;
+    echo "<script>
+    alert('Retry Please!! enter valid email address');
+    window.location.href = 'index.php';
+  </script>";
+  $conn->close();
+  exit();
+
 }
 
 
